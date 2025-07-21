@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+rdkit-pypi          # 2025.03.4 or latest
+
