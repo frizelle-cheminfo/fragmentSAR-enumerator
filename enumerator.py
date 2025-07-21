@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse        
+from fastapi.requests import Request 
 from rdkit import Chem
 from rdkit.Chem import AllChem, Descriptors, QED
 
@@ -19,9 +21,19 @@ FG = {           # 30 groups, * = attachment point
 }
 
 app = FastAPI(title="Fragment‑SAR enumerator")
-app.add_middleware(CORSMiddleware, allow_origins=["*"],
-                   allow_methods=["*"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+@app.exception_handler(Exception)
+async def all_errors(request: Request, exc: Exception):
+    """
+    Catch *any* uncaught exception and turn it into
+    JSON so the front‑end gets a clean 500 response.
+    """
+    return JSONResponse(
+        {"detail": str(exc)},   # what went wrong
+        status_code=500
+    )
 def desc(m):
     d = {
         "smiles": Chem.MolToSmiles(m, True),
